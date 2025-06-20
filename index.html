@@ -1,443 +1,516 @@
-import React, { useState, useEffect } from 'react';
-// No direct import for lucide-react here. We'll use the global 'lucide' object from CDN.
-
-// Custom Lucide Icon Component to dynamically render icons using the global lucide object
-const LucideIcon = ({ name, className = "" }) => {
-    const iconSvg = window.lucide && window.lucide.icons[name] ? window.lucide.icons[name].toSvg() : '';
-    
-    if (!iconSvg) {
-        // Fallback for missing icons or if lucide is not yet loaded
-        console.warn(`Lucide icon "${name}" not found or lucide library not loaded. Using a placeholder.`);
-        return <span className={`inline-block w-6 h-6 bg-gray-300 rounded ${className}`} title={`Icon missing: ${name}`}></span>;
-    }
-    
-    return <span className={className} dangerouslySetInnerHTML={{ __html: iconSvg }} />;
-};
-
-const App = () => {
-    const [currentPage, setCurrentPage] = useState('home');
-
-    // Content generated based on the user's request
-    const content = {
-        aboutUsText: "At Offsetease, we believe in a future where businesses thrive in harmony with the planet. We are a pioneering climate management consulting firm dedicated to empowering corporations and MSMEs to not just adapt, but to lead the global climate transition. Our mission extends beyond mere compliance; we aim to foster truly measurable, finance-ready, and impactful climate action. Founded on principles of integrity, innovation, and expertise, Offsetease brings together deep understanding of environmental markets, climate strategy, and sustainability advisory. We are committed to guiding our clients through the complexities of decarbonization, enabling them to build resilient, responsible, and future-proof enterprises that contribute positively to a sustainable world.",
-        carbonMarketSolutionsText: "Offsetease offers end-to-end support for developing high-integrity emission reduction projects across various methodologies. We specialize in Nature-Based Solutions (e.g., afforestation, reforestation, improved land management), Engineered Solutions (e.g., carbon capture and storage, industrial process improvements), and Community-Driven Projects (e.g., clean cooking, renewable energy access). Our full project cycle support covers everything from initial ideation, feasibility studies, methodology selection, and validation, through to registration, monitoring, verification, and the ultimate issuance of verifiable carbon credits. We ensure projects meet global standards, delivering tangible environmental benefits and creating new revenue streams for our clients.",
-        environmentalAttributeTradingText: "Navigating the dynamic landscape of environmental attribute trading requires deep market intelligence and robust due diligence. Offsetease provides transparent deal facilitation for the trading of Carbon Credits, Renewable Energy Certificates (RECs), and other verified environmental instruments. Leveraging our extensive network and real-time pricing intelligence, we connect buyers and sellers, ensuring optimal value and secure transactions. Our expertise extends to verifying the authenticity and compliance of instruments, mitigating risks for our clients, and fostering liquid and trustworthy environmental markets that accelerate climate finance.",
-        sustainabilityConsultingText: "Offsetease's comprehensive sustainability consulting services are tailored to the unique challenges and opportunities within high-impact sectors like Chemicals, Textiles, Pharma, Engineering, Gems, and Steel. We guide businesses through critical reporting frameworks and strategic planning, including: conducting thorough GHG Inventory assessments, aligning with Science-Based Targets initiative (SBTi), navigating ESG disclosures, performing Life Cycle Assessments (LCA), preparing for Carbon Border Adjustment Mechanism (CBAM) implications, and fulfilling BRSR, CDP, GRI reporting requirements. Furthermore, we develop robust Scope 3 measurement and reduction strategies and actionable Net Zero Roadmaps to secure long-term climate leadership.",
-        decarbonizationFinancingText: "Accessing green finance is crucial for MSMEs in energy-intensive sectors to fund their decarbonization journeys. Offsetease provides end-to-end support to help these businesses unlock vital capital. We assist with navigating complex funding landscapes, including specialized programs like SIDBI MSE-GIFT in India, and connecting clients with various international climate funds and green investment opportunities. Our support encompasses identifying suitable financing mechanisms, preparing compelling proposals, conducting financial due diligence, and facilitating successful capital deployment, ensuring that financial barriers do not hinder climate action."
-    };
-
-    // Navbar Component
-    const Navbar = () => (
-        <nav className="bg-white shadow-sm py-4">
-            <div className="container mx-auto px-4 flex justify-between items-center flex-wrap">
-                {/* Logo and Name */}
-                <div className="flex items-center mb-2 md:mb-0">
-                    {/* Replace 'YOUR_PUBLIC_LOGO_URL_HERE' with the actual public URL of your logo.
-                        Google Drive links will NOT work directly.
-                        Upload your logo to your GitHub repo and use the 'Raw' URL.
-                        Example: https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO_NAME/main/your_logo.png
-                    */}
-                    <img
-                        src="YOUR_PUBLIC_LOGO_URL_HERE" // <--- **REPLACE THIS WITH YOUR PUBLIC LOGO URL**
-                        alt="Offsetease Logo"
-                        className="h-9 w-auto mr-3 rounded-md"
-                        onError={(e) => {
-                            // Fallback if the image fails to load (e.g., due to incorrect URL or permissions)
-                            e.target.onerror = null; // Prevents infinite loop if fallback also fails
-                            e.target.src = "https://placehold.co/36x36/E0F2F7/007BFF?text=O"; // A simple 'O' placeholder
-                            e.target.className = "h-9 w-9 flex items-center justify-center mr-3 rounded-lg shadow-sm"; // Adjust fallback styling
-                        }}
-                    />
-                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Offsetease</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offsetease – Carbon Management Company</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN for vector icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff; /* Explicitly white background */
+            color: #333333;
+        }
+        /* Custom styles for Lucide icons to ensure consistent sizing and alignment */
+        .lucide-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px; /* Default margin for icons next to text */
+        }
+        .section-padding {
+            padding: 4rem 1rem; /* Responsive padding for sections */
+        }
+        @media (min-width: 640px) { /* Small screens and up */
+            .section-padding {
+                padding: 6rem 2rem;
+            }
+        }
+        @media (min-width: 1024px) { /* Large screens and up */
+            .section-padding {
+                padding: 8rem 4rem;
+            }
+        }
+        /* Page content styling - default all pages hidden except active */
+        .page-content {
+            display: none;
+        }
+        .page-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="antialiased leading-relaxed">
+    <!-- Header/Navigation Bar -->
+    <header class="bg-white shadow-sm py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <!-- Logo & Company Name -->
+            <div class="flex items-center">
+                <!-- IMPORTANT: Replace 'YOUR_PUBLIC_LOGO_URL_HERE' with the actual public URL of your logo.
+                     Google Drive links will NOT work directly.
+                     Upload your logo to your GitHub repo and use the 'Raw' URL.
+                     Example: https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO_NAME/main/your_logo.png
+                -->
+                <img
+                    src="YOUR_PUBLIC_LOGO_URL_HERE"
+                    alt="Offsetease Logo"
+                    class="h-9 w-auto mr-3 rounded-md"
+                    onerror="this.onerror=null;this.src='https://placehold.co/36x36/E0F2F7/007BFF?text=O';this.className='h-9 w-9 flex items-center justify-center mr-3 rounded-lg shadow-sm';"
+                >
+                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Offsetease</h1>
+            </div>
+            <!-- Navigation Links -->
+            <nav>
+                <div class="flex space-x-6">
+                    <button onclick="showPage('home')" class="nav-item text-gray-700 hover:text-green-600 px-3 py-2 rounded-md transition-colors duration-200 text-lg font-medium active">Home</button>
+                    <button onclick="showPage('about')" class="nav-item text-gray-700 hover:text-green-600 px-3 py-2 rounded-md transition-colors duration-200 text-lg font-medium">About Us</button>
+                    <button onclick="showPage('services')" class="nav-item text-gray-700 hover:text-green-600 px-3 py-2 rounded-md transition-colors duration-200 text-lg font-medium">Services</button>
+                    <button onclick="showPage('contact')" class="nav-item text-gray-700 hover:text-green-600 px-3 py-2 rounded-md transition-colors duration-200 text-lg font-medium">Contact</button>
                 </div>
-                {/* Navigation Links */}
-                <div className="flex space-x-6">
-                    <NavItem name="Home" targetPage="home" />
-                    <NavItem name="About Us" targetPage="about" />
-                    <NavItem name="Services" targetPage="services" />
-                    <NavItem name="Contact" targetPage="contact" />
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        <!-- Home Page Content -->
+        <section id="home" class="page-content active">
+            <!-- Hero Section -->
+            <div class="section-padding bg-gradient-to-r from-green-50 to-emerald-50 text-center py-24 md:py-32 lg:py-40">
+                <div class="container mx-auto px-4 max-w-4xl">
+                    <h2 class="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-tight max-w-4xl mx-auto">
+                        Empowering Businesses to Lead the Climate Transition
+                    </h2>
+                    <p class="text-lg md:text-xl text-gray-700 mb-10 max-w-3xl mx-auto">
+                        Offsetease is a consulting firm providing climate strategy, environmental markets expertise, and sustainability advisory for corporations and MSMEs. Our mission is to help businesses take measurable, compliant, and finance-ready climate action.
+                    </p>
+                    <button
+                        onclick="showPage('services')"
+                        class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 flex items-center justify-center mx-auto"
+                    >
+                        <span data-lucide="chevron-right" class="lucide-icon text-white"></span> Explore Our Services
+                    </button>
                 </div>
             </div>
-        </nav>
-    );
 
-    // Navigation Item Component
-    const NavItem = ({ name, targetPage }) => (
-        <button
-            onClick={() => setCurrentPage(targetPage)}
-            className={`text-gray-700 hover:text-green-600 px-3 py-2 rounded-md transition-colors duration-200 text-lg font-medium ${
-                currentPage === targetPage ? 'text-green-600 bg-green-50' : ''
-            }`}
-        >
-            {name}
-        </button>
-    );
-
-    // Footer Component
-    const Footer = () => (
-        <footer className="bg-gray-800 text-white py-8 text-center">
-            <div className="container mx-auto px-4">
-                <p>&copy; {new Date().getFullYear()} Offsetease. All rights reserved.</p>
-                <p className="mt-2 text-sm text-gray-400">Strategic Climate Advisory for Business Impact</p>
+            <!-- What We Do Section (Summary) -->
+            <div class="section-padding bg-gray-50">
+                <div class="container mx-auto px-4">
+                    <h3 class="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">What We Do</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <!-- Service Card 1 -->
+                        <div class="bg-white p-8 rounded-xl shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-lg flex flex-col items-center text-center border border-gray-100">
+                            <div class="text-green-600 mb-4 bg-green-50 p-3 rounded-full">
+                                <span data-lucide="leaf" class="w-8 h-8"></span>
+                            </div>
+                            <h4 class="text-xl font-semibold text-gray-800 mb-3">Carbon Market Solutions</h4>
+                            <p class="text-gray-700 leading-relaxed text-center">Development of Nature-Based, Engineered, and Community-Driven Emission Reduction Projects. Full project cycle support—from ideation to credit issuance.</p>
+                        </div>
+                        <!-- Service Card 2 -->
+                        <div class="bg-white p-8 rounded-xl shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-lg flex flex-col items-center text-center border border-gray-100">
+                            <div class="text-green-600 mb-4 bg-green-50 p-3 rounded-full">
+                                <span data-lucide="bar-chart-2" class="w-8 h-8"></span>
+                            </div>
+                            <h4 class="text-xl font-semibold text-gray-800 mb-3">Environmental Attribute Trading</h4>
+                            <p class="text-gray-700 leading-relaxed text-center">Trading of Carbon Credits, RECs, and other verified instruments. Transparent deal facilitation with pricing intelligence and due diligence.</p>
+                        </div>
+                        <!-- Service Card 3 -->
+                        <div class="bg-white p-8 rounded-xl shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-lg flex flex-col items-center text-center border border-gray-100">
+                            <div class="text-green-600 mb-4 bg-green-50 p-3 rounded-full">
+                                <span data-lucide="briefcase" class="w-8 h-8"></span>
+                            </div>
+                            <h4 class="text-xl font-semibold text-gray-800 mb-3">Sustainability Consulting</h4>
+                            <p class="text-gray-700 leading-relaxed text-center">Sector-specific support for Chemicals, Textiles, Pharma, Engineering, Gems, and Steel, covering various reporting and roadmaps.</p>
+                        </div>
+                        <!-- Service Card 4 -->
+                        <div class="bg-white p-8 rounded-xl shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-lg flex flex-col items-center text-center border border-gray-100">
+                            <div class="text-green-600 mb-4 bg-green-50 p-3 rounded-full">
+                                <span data-lucide="dollar-sign" class="w-8 h-8"></span>
+                            </div>
+                            <h4 class="text-xl font-semibold text-gray-800 mb-3">Decarbonization Financing</h4>
+                            <p class="text-gray-700 leading-relaxed text-center">Helping MSMEs in energy-intensive sectors access green finance. End-to-end support for programs like SIDBI MSE-GIFT and international climate funds.</p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-12">
+                        <button
+                            onclick="showPage('services')"
+                            class="text-green-600 hover:text-green-800 text-lg font-semibold flex items-center justify-center mx-auto transition-colors duration-200"
+                        >
+                            Learn more about all our services <span data-lucide="arrow-right" class="lucide-icon ml-2"></span>
+                        </button>
+                    </div>
+                </div>
             </div>
-        </footer>
-    );
 
-    // Section Padding utility class
-    const Section = ({ id, children, className = "bg-white" }) => (
-        <section id={id} className={`py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 ${className}`}>
-            <div className="container mx-auto">
-                {children}
+            <!-- Why Offsetease Section (Summary) -->
+            <div class="section-padding bg-white">
+                <div class="container mx-auto px-4 max-w-4xl">
+                    <h3 class="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">Why Offsetease?</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Value Card 1 -->
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-start space-x-4 border border-gray-100 transition-shadow duration-300 hover:shadow-lg">
+                            <span data-lucide="check-circle" class="lucide-icon text-green-600 mt-1 flex-shrink-0"></span>
+                            <p class="text-lg text-gray-700 font-medium">Integrated Climate & Market Expertise</p>
+                        </div>
+                        <!-- Value Card 2 -->
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-start space-x-4 border border-gray-100 transition-shadow duration-300 hover:shadow-lg">
+                            <span data-lucide="globe" class="lucide-icon text-green-600 mt-1 flex-shrink-0"></span>
+                            <p class="text-lg text-gray-700 font-medium">Global Framework Alignment (IPCC, GHG Protocol, SBTi, CDP)</p>
+                        </div>
+                        <!-- Value Card 3 -->
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-start space-x-4 border border-gray-100 transition-shadow duration-300 hover:shadow-lg">
+                            <span data-lucide="shield-check" class="lucide-icon text-green-600 mt-1 flex-shrink-0"></span>
+                            <p class="text-lg text-gray-700 font-medium">Solutions for Policy Impact, Risk Reduction & Compliance</p>
+                        </div>
+                        <!-- Value Card 4 -->
+                        <div class="bg-white p-6 rounded-xl shadow-md flex items-start space-x-4 border border-gray-100 transition-shadow duration-300 hover:shadow-lg">
+                            <span data-lucide="users" class="lucide-icon text-green-600 mt-1 flex-shrink-0"></span>
+                            <p class="text-lg text-gray-700 font-medium">Tailored Support for MSMEs and High-Impact Sectors</p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-12">
+                        <button
+                            onclick="showPage('about')"
+                            class="text-green-600 hover:text-green-800 text-lg font-semibold flex items-center justify-center mx-auto transition-colors duration-200"
+                        >
+                            Discover more about us <span data-lucide="arrow-right" class="lucide-icon ml-2"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call to Action Section -->
+            <div class="section-padding bg-green-700 text-white text-center py-20 md:py-24">
+                <div class="container mx-auto px-4 max-w-3xl">
+                    <h3 class="text-3xl md:text-4xl font-bold mb-6">Ready to lead the climate transition?</h3>
+                    <p class="text-lg md:text-xl mb-10 max-w-2xl mx-auto">
+                        Partner with Offsetease for strategic climate advisory that drives real business impact.
+                    </p>
+                    <button
+                        onclick="showPage('contact')"
+                        class="bg-white text-green-700 hover:bg-green-100 font-semibold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-white flex items-center justify-center mx-auto"
+                    >
+                        <span data-lucide="message-circle" class="lucide-icon mr-2"></span> Get in Touch
+                    </button>
+                </div>
             </div>
         </section>
-    );
 
-    // Home Page Component
-    const HomePage = () => (
-        <>
-            {/* Hero Section */}
-            <Section id="hero" className="bg-gradient-to-r from-green-50 to-emerald-50 text-center py-24 md:py-32 lg:py-40">
-                <h2 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-tight max-w-4xl mx-auto">
-                    Empowering Businesses to Lead the Climate Transition
-                </h2>
-                <p className="text-lg md:text-xl text-gray-700 mb-10 max-w-3xl mx-auto">
-                    Offsetease is a consulting firm providing climate strategy, environmental markets expertise, and sustainability advisory for corporations and MSMEs. Our mission is to help businesses take measurable, compliant, and finance-ready climate action.
-                </p>
-                <button
-                    onClick={() => setCurrentPage('services')}
-                    className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 flex items-center justify-center mx-auto"
-                >
-                    <LucideIcon name="chevron-right" className="w-5 h-5 mr-2" /> Explore Our Services
-                </button>
-            </Section>
+        <!-- About Us Page Content -->
+        <section id="about" class="page-content">
+            <div class="section-padding bg-gray-50">
+                <div class="container mx-auto px-4">
+                    <h3 class="text-4xl md:text-5xl font-bold text-gray-900 text-center mb-12">About Offsetease</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        <div class="lg:pr-8">
+                            <p class="text-lg text-gray-700 leading-relaxed mb-6">
+                                At Offsetease, we believe in a future where businesses thrive in harmony with the planet. We are a pioneering climate management consulting firm dedicated to empowering corporations and MSMEs to not just adapt, but to lead the global climate transition. Our mission extends beyond mere compliance; we aim to foster truly measurable, finance-ready, and impactful climate action. Founded on principles of integrity, innovation, and expertise, Offsetease brings together deep understanding of environmental markets, climate strategy, and sustainability advisory. We are committed to guiding our clients through the complexities of decarbonization, enabling them to build resilient, responsible, and future-proof enterprises that contribute positively to a sustainable world.
+                            </p>
+                            <p class="text-lg text-gray-700 leading-relaxed">
+                                We are driven by a deep commitment to environmental stewardship and economic prosperity, guiding our clients to implement sustainable practices that deliver both ecological integrity and competitive advantage.
+                            </p>
+                            <div class="mt-8">
+                                <button
+                                    onclick="showPage('contact')"
+                                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 flex items-center justify-center"
+                                >
+                                    <span data-lucide="handshake" class="lucide-icon mr-2"></span> Partner with Us
+                                </button>
+                            </div>
+                        </div>
+                        <div class="rounded-xl overflow-hidden shadow-xl border border-gray-100">
+                            <img
+                                src="https://placehold.co/600x400/D1FAE5/10B981?text=Sustainable+Future"
+                                alt="Offsetease Team Working"
+                                class="w-full h-auto object-cover"
+                                onerror="this.onerror=null;this.src='https://placehold.co/600x400/D1FAE5/10B981?text=Image+Not+Found';"
+                            />
+                        </div>
+                    </div>
 
-            {/* What We Do Section (Summary) */}
-            <Section id="home-services" className="bg-gray-50">
-                <h3 className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">What We Do</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <ServiceCard
-                        icon="leaf"
-                        title="Carbon Market Solutions"
-                        description="Development of Nature-Based, Engineered, and Community-Driven Emission Reduction Projects. Full project cycle support—from ideation to credit issuance."
-                    />
-                    <ServiceCard
-                        icon="bar-chart-2"
-                        title="Environmental Attribute Trading"
-                        description="Trading of Carbon Credits, RECs, and other verified instruments. Transparent deal facilitation with pricing intelligence and due diligence."
-                    />
-                    <ServiceCard
-                        icon="briefcase"
-                        title="Sustainability Consulting"
-                        description="Sector-specific support for Chemicals, Textiles, Pharma, Engineering, Gems, and Steel, covering various reporting and roadmaps."
-                    />
-                    <ServiceCard
-                        icon="dollar-sign"
-                        title="Decarbonization Financing"
-                        description="Helping MSMEs in energy-intensive sectors access green finance. End-to-end support for programs like SIDBI MSE-GIFT and international climate funds."
-                    />
+                    <h4 class="text-3xl font-bold text-gray-900 text-center mt-20 mb-10">Our Core Values</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                        <!-- Value Pillar 1 -->
+                        <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100 flex flex-col items-center">
+                            <div class="text-green-600 mb-4 bg-green-50 p-4 rounded-full">
+                                <span data-lucide="hand-heart" class="w-10 h-10"></span>
+                            </div>
+                            <h4 class="text-xl font-semibold text-gray-800 mb-3">Integrity</h4>
+                            <p class="text-gray-700 leading-relaxed">Upholding the highest standards of honesty and transparency in all our operations.</p>
+                        </div>
+                        <!-- Value Pillar 2 -->
+                        <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100 flex flex-col items-center">
+                            <div class="text-green-600 mb-4 bg-green-50 p-4 rounded-full">
+                                <span data-lucide="lightbulb" class="w-10 h-10"></span>
+                            </div>
+                            <h4 class="text-xl font-semibold text-gray-800 mb-3">Innovation</h4>
+                            <p class="text-gray-700 leading-relaxed">Continuously seeking cutting-edge solutions for complex climate challenges.</p>
+                        </div>
+                        <!-- Value Pillar 3 -->
+                        <div class="bg-white p-8 rounded-xl shadow-md border border-gray-100 flex flex-col items-center">
+                            <div class="text-green-600 mb-4 bg-green-50 p-4 rounded-full">
+                                <span data-lucide="trending-up" class="w-10 h-10"></span>
+                            </div>
+                            <h4 class="text-xl font-semibold text-gray-800 mb-3">Impact</h4>
+                            <p class="text-gray-700 leading-relaxed">Committed to delivering measurable and positive environmental and business outcomes.</p>
+                        </div>
+                    </div>
                 </div>
-                <div className="text-center mt-12">
-                    <button
-                        onClick={() => setCurrentPage('services')}
-                        className="text-green-600 hover:text-green-800 text-lg font-semibold flex items-center justify-center mx-auto transition-colors duration-200"
-                    >
-                        Learn more about all our services <LucideIcon name="arrow-right" className="w-5 h-5 ml-2" />
-                    </button>
-                </div>
-            </Section>
-
-            {/* Why Offsetease Section (Summary) */}
-            <Section id="home-why" className="bg-white">
-                <h3 className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">Why Offsetease?</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <ValueCard
-                        icon="check-circle"
-                        text="Integrated Climate & Market Expertise"
-                    />
-                    <ValueCard
-                        icon="globe"
-                        text="Global Framework Alignment (IPCC, GHG Protocol, SBTi, CDP)"
-                    />
-                    <ValueCard
-                        icon="shield-check"
-                        text="Solutions for Policy Impact, Risk Reduction & Compliance"
-                    />
-                    <ValueCard
-                        icon="users"
-                        text="Tailored Support for MSMEs and High-Impact Sectors"
-                    />
-                </div>
-                <div className="text-center mt-12">
-                    <button
-                        onClick={() => setCurrentPage('about')}
-                        className="text-green-600 hover:text-green-800 text-lg font-semibold flex items-center justify-center mx-auto transition-colors duration-200"
-                    >
-                        Discover more about us <LucideIcon name="arrow-right" className="w-5 h-5 ml-2" />
-                    </button>
-                </div>
-            </Section>
-
-            {/* Call to Action Section */}
-            <Section id="home-cta" className="bg-green-700 text-white text-center py-20 md:py-24">
-                <h3 className="text-3xl md:text-4xl font-bold mb-6">Ready to lead the climate transition?</h3>
-                <p className="text-lg md:text-xl mb-10 max-w-2xl mx-auto">
-                    Partner with Offsetease for strategic climate advisory that drives real business impact.
-                </p>
-                <button
-                    onClick={() => setCurrentPage('contact')}
-                    className="bg-white text-green-700 hover:bg-green-100 font-semibold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-white flex items-center justify-center mx-auto"
-                >
-                    <LucideIcon name="message-circle" className="w-5 h-5 mr-2" /> Get in Touch
-                </button>
-            </Section>
-        </>
-    );
-
-    // Card Component for Services on Home Page
-    const ServiceCard = ({ icon, title, description }) => (
-        <div className="bg-white p-8 rounded-xl shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-lg flex flex-col items-center text-center border border-gray-100">
-            <div className="text-green-600 mb-4 bg-green-50 p-3 rounded-full">
-                <LucideIcon name={icon} className="w-8 h-8" />
             </div>
-            <h4 className="text-xl font-semibold text-gray-800 mb-3">{title}</h4>
-            <p className="text-gray-700 leading-relaxed text-center">{description}</p>
-        </div>
-    );
+        </section>
 
-    // Card Component for Values on Home Page
-    const ValueCard = ({ icon, text }) => (
-        <div className="bg-white p-6 rounded-xl shadow-md flex items-start space-x-4 border border-gray-100 transition-shadow duration-300 hover:shadow-lg">
-            <LucideIcon name={icon} className="text-green-600 w-6 h-6 flex-shrink-0 mt-1" />
-            <p className="text-lg text-gray-700 font-medium">{text}</p>
-        </div>
-    );
+        <!-- Services Page Content -->
+        <section id="services" class="page-content">
+            <div class="section-padding bg-white">
+                <div class="container mx-auto px-4">
+                    <h3 class="text-4xl md:text-5xl font-bold text-gray-900 text-center mb-12">Our Services</h3>
+                    <p class="text-xl text-gray-700 text-center mb-16 max-w-3xl mx-auto">
+                        Offsetease offers a comprehensive suite of services designed to help your business navigate the complexities of climate action and environmental markets.
+                    </p>
 
-    // About Us Page Component
-    const AboutPage = () => (
-        <Section id="about-us" className="bg-gray-50">
-            <h3 className="text-4xl md:text-5xl font-bold text-gray-900 text-center mb-12">About Offsetease</h3>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div className="lg:pr-8">
-                    <p className="text-lg text-gray-700 leading-relaxed mb-6">
-                        {content.aboutUsText}
-                    </p>
-                    <p className="text-lg text-gray-700 leading-relaxed">
-                        We are driven by a deep commitment to environmental stewardship and economic prosperity, guiding our clients to implement sustainable practices that deliver both ecological integrity and competitive advantage.
-                    </p>
-                    <div className="mt-8">
+                    <!-- Service Detail Card 1: Carbon Market Solutions -->
+                    <div class="flex flex-col lg:flex-row items-center bg-gray-50 rounded-xl shadow-lg mb-12 p-8 border border-gray-100">
+                        <div class="lg:w-1/2 p-4 flex justify-center items-center mb-8 lg:mb-0">
+                            <img
+                                src="https://placehold.co/600x350/E0F2F7/007BFF?text=Carbon+Markets"
+                                alt="Carbon Markets"
+                                class="rounded-lg shadow-md w-full max-w-md h-auto object-cover"
+                                onerror="this.onerror=null;this.src='https://placehold.co/600x350/CCCCCC/333333?text=Carbon+Markets';"
+                            />
+                        </div>
+                        <div class="lg:w-1/2 p-4 lg:pl-8">
+                            <div class="flex items-center mb-4">
+                                <div class="text-green-600 bg-green-100 p-3 rounded-full mr-3">
+                                    <span data-lucide="leaf" class="w-8 h-8"></span>
+                                </div>
+                                <h4 class="text-3xl font-bold text-gray-900">Carbon Market Solutions</h4>
+                            </div>
+                            <p class="text-lg text-gray-700 leading-relaxed">Offsetease offers end-to-end support for developing high-integrity emission reduction projects across various methodologies. We specialize in Nature-Based Solutions (e.g., afforestation, reforestation, improved land management), Engineered Solutions (e.g., carbon capture and storage, industrial process improvements), and Community-Driven Projects (e.g., clean cooking, renewable energy access). Our full project cycle support covers everything from initial ideation, feasibility studies, methodology selection, and validation, through to registration, monitoring, verification, and the ultimate issuance of verifiable carbon credits. We ensure projects meet global standards, delivering tangible environmental benefits and creating new revenue streams for our clients.</p>
+                        </div>
+                    </div>
+
+                    <!-- Service Detail Card 2: Environmental Attribute Trading -->
+                    <div class="flex flex-col lg:flex-row-reverse items-center bg-gray-50 rounded-xl shadow-lg mb-12 p-8 border border-gray-100">
+                        <div class="lg:w-1/2 p-4 flex justify-center items-center mb-8 lg:mb-0">
+                            <img
+                                src="https://placehold.co/600x350/FFE0B2/FF5722?text=Attribute+Trading"
+                                alt="Attribute Trading"
+                                class="rounded-lg shadow-md w-full max-w-md h-auto object-cover"
+                                onerror="this.onerror=null;this.src='https://placehold.co/600x350/CCCCCC/333333?text=Attribute+Trading';"
+                            />
+                        </div>
+                        <div class="lg:w-1/2 p-4 lg:pl-8">
+                            <div class="flex items-center mb-4">
+                                <div class="text-green-600 bg-green-100 p-3 rounded-full mr-3">
+                                    <span data-lucide="bar-chart-2" class="w-8 h-8"></span>
+                                </div>
+                                <h4 class="text-3xl font-bold text-gray-900">Environmental Attribute Trading</h4>
+                            </div>
+                            <p class="text-lg text-gray-700 leading-relaxed">Navigating the dynamic landscape of environmental attribute trading requires deep market intelligence and robust due diligence. Offsetease provides transparent deal facilitation for the trading of Carbon Credits, Renewable Energy Certificates (RECs), and other verified environmental instruments. Leveraging our extensive network and real-time pricing intelligence, we connect buyers and sellers, ensuring optimal value and secure transactions. Our expertise extends to verifying the authenticity and compliance of instruments, mitigating risks for our clients, and fostering liquid and trustworthy environmental markets that accelerate climate finance.</p>
+                        </div>
+                    </div>
+
+                    <!-- Service Detail Card 3: Sustainability Consulting -->
+                    <div class="flex flex-col lg:flex-row items-center bg-gray-50 rounded-xl shadow-lg mb-12 p-8 border border-gray-100">
+                        <div class="lg:w-1/2 p-4 flex justify-center items-center mb-8 lg:mb-0">
+                            <img
+                                src="https://placehold.co/600x350/DCEDC8/4CAF50?text=Sustainability+Consulting"
+                                alt="Sustainability Consulting"
+                                class="rounded-lg shadow-md w-full max-w-md h-auto object-cover"
+                                onerror="this.onerror=null;this.src='https://placehold.co/600x350/CCCCCC/333333?text=Sustainability+Consulting';"
+                            />
+                        </div>
+                        <div class="lg:w-1/2 p-4 lg:pl-8">
+                            <div class="flex items-center mb-4">
+                                <div class="text-green-600 bg-green-100 p-3 rounded-full mr-3">
+                                    <span data-lucide="briefcase" class="w-8 h-8"></span>
+                                </div>
+                                <h4 class="text-3xl font-bold text-gray-900">Sustainability Consulting</h4>
+                            </div>
+                            <p class="text-lg text-gray-700 leading-relaxed">Offsetease's comprehensive sustainability consulting services are tailored to the unique challenges and opportunities within high-impact sectors like Chemicals, Textiles, Pharma, Engineering, Gems, and Steel. We guide businesses through critical reporting frameworks and strategic planning, including: conducting thorough GHG Inventory assessments, aligning with Science-Based Targets initiative (SBTi), navigating ESG disclosures, performing Life Cycle Assessments (LCA), preparing for Carbon Border Adjustment Mechanism (CBAM) implications, and fulfilling BRSR, CDP, and GRI reporting requirements. Furthermore, we develop robust Scope 3 measurement and reduction strategies and actionable Net Zero Roadmaps to secure long-term climate leadership.</p>
+                        </div>
+                    </div>
+
+                    <!-- Service Detail Card 4: Decarbonization Financing -->
+                    <div class="flex flex-col lg:flex-row-reverse items-center bg-gray-50 rounded-xl shadow-lg mb-12 p-8 border border-gray-100">
+                        <div class="lg:w-1/2 p-4 flex justify-center items-center mb-8 lg:mb-0">
+                            <img
+                                src="https://placehold.co/600x350/FFCDD2/F44336?text=Green+Financing"
+                                alt="Green Financing"
+                                class="rounded-lg shadow-md w-full max-w-md h-auto object-cover"
+                                onerror="this.onerror=null;this.src='https://placehold.co/600x350/CCCCCC/333333?text=Green+Financing';"
+                            />
+                        </div>
+                        <div class="lg:w-1/2 p-4 lg:pl-8">
+                            <div class="flex items-center mb-4">
+                                <div class="text-green-600 bg-green-100 p-3 rounded-full mr-3">
+                                    <span data-lucide="dollar-sign" class="w-8 h-8"></span>
+                                </div>
+                                <h4 class="text-3xl font-bold text-gray-900">Decarbonization Financing</h4>
+                            </div>
+                            <p class="text-lg text-gray-700 leading-relaxed">Accessing green finance is crucial for MSMEs in energy-intensive sectors to fund their decarbonization journeys. Offsetease provides end-to-end support to help these businesses unlock vital capital. We assist with navigating complex funding landscapes, including specialized programs like SIDBI MSE-GIFT in India, and connecting clients with various international climate funds and green investment opportunities. Our support encompasses identifying suitable financing mechanisms, preparing compelling proposals, conducting financial due diligence, and facilitating successful capital deployment, ensuring that financial barriers do not hinder climate action.</p>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-16">
+                        <h4 class="text-3xl font-bold text-gray-900 mb-6">Ready to Transform Your Business?</h4>
+                        <p class="text-lg text-gray-700 mb-8">
+                            Contact us today to discuss how our tailored solutions can benefit your organization.
+                        </p>
                         <button
-                            onClick={() => setCurrentPage('contact')}
-                            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 flex items-center justify-center"
+                            onclick="showPage('contact')"
+                            class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 flex items-center justify-center mx-auto"
                         >
-                            <LucideIcon name="handshake" className="w-5 h-5 mr-2" /> Partner with Us
+                            <span data-lucide="calendar-check" class="lucide-icon mr-2"></span> Schedule a Consultation
                         </button>
                     </div>
                 </div>
-                <div className="rounded-xl overflow-hidden shadow-xl border border-gray-100">
-                    <img
-                        src="https://placehold.co/600x400/D1FAE5/10B981?text=Sustainable+Future"
-                        alt="Offsetease Team Working"
-                        className="w-full h-auto object-cover"
-                        onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/600x400/D1FAE5/10B981?text=Image+Not+Found"; }}
-                    />
-                </div>
             </div>
+        </section>
 
-            <h4 className="text-3xl font-bold text-gray-900 text-center mt-20 mb-10">Our Core Values</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                <ValuePillar icon="hand-heart" title="Integrity" description="Upholding the highest standards of honesty and transparency in all our operations." />
-                <ValuePillar icon="lightbulb" title="Innovation" description="Continuously seeking cutting-edge solutions for complex climate challenges." />
-                <ValuePillar icon="trending-up" title="Impact" description="Committed to delivering measurable and positive environmental and business outcomes." />
-            </div>
-        </Section>
-    );
+        <!-- Contact Us Page Content -->
+        <section id="contact" class="page-content">
+            <div class="section-padding bg-gray-50">
+                <div class="container mx-auto px-4">
+                    <h3 class="text-4xl md:text-5xl font-bold text-gray-900 text-center mb-12">Get in Touch</h3>
+                    <p class="text-xl text-gray-700 text-center mb-16 max-w-2xl mx-auto">
+                        We'd love to hear from you. Whether you have a question about our services, a partnership inquiry, or just want to discuss your climate strategy, our team is ready to assist.
+                    </p>
 
-    // Value Pillar Component for About Page
-    const ValuePillar = ({ icon, title, description }) => (
-        <div className="bg-white p-8 rounded-xl shadow-md border border-gray-100 flex flex-col items-center">
-            <div className="text-green-600 mb-4 bg-green-50 p-4 rounded-full">
-                <LucideIcon name={icon} className="w-10 h-10" />
-            </div>
-            <h4 className="text-xl font-semibold text-gray-800 mb-3">{title}</h4>
-            <p className="text-gray-700 leading-relaxed">{description}</p>
-        </div>
-    );
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <!-- Contact Information -->
+                        <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                            <h4 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                                <span data-lucide="info" class="lucide-icon text-green-600 mr-3"></span> Our Details
+                            </h4>
+                            <p class="text-lg text-gray-700 mb-4 flex items-center">
+                                <span data-lucide="map-pin" class="lucide-icon text-green-600 mr-3"></span>
+                                Ahmedabad & Pune, India
+                            </p>
+                            <p class="text-lg text-gray-700 mb-4 flex items-center">
+                                <span data-lucide="mail" class="lucide-icon text-green-600 mr-3"></span>
+                                <a href="mailto:contact@offsetease.com" class="text-green-700 hover:underline">contact@offsetease.com</a>
+                            </p>
+                            <p class="text-lg text-gray-700 mb-4 flex items-center">
+                                <span data-lucide="phone" class="lucide-icon text-green-600 mr-3"></span>
+                                +91 98765 43210 (Placeholder)
+                            </p>
+                            <p class="text-sm text-gray-600 mt-6">
+                                Offsetease – Strategic Climate Advisory for Business Impact
+                            </p>
+                        </div>
 
-    // Services Page Component
-    const ServicesPage = () => (
-        <Section id="services" className="bg-white">
-            <h3 className="text-4xl md:text-5xl font-bold text-gray-900 text-center mb-12">Our Services</h3>
-            <p className="text-xl text-gray-700 text-center mb-16 max-w-3xl mx-auto">
-                Offsetease offers a comprehensive suite of services designed to help your business navigate the complexities of climate action and environmental markets.
-            </p>
-
-            <ServiceDetailCard
-                icon="leaf"
-                title="Carbon Market Solutions"
-                description={content.carbonMarketSolutionsText}
-                image="https://placehold.co/600x350/E0F2F7/007BFF?text=Carbon+Markets"
-                isReversed={false}
-            />
-            <ServiceDetailCard
-                icon="bar-chart-2"
-                title="Environmental Attribute Trading"
-                description={content.environmentalAttributeTradingText}
-                image="https://placehold.co/600x350/FFE0B2/FF5722?text=Attribute+Trading"
-                isReversed={true}
-            />
-            <ServiceDetailCard
-                icon="briefcase"
-                title="Sustainability Consulting"
-                description={content.sustainabilityConsultingText}
-                image="https://placehold.co/600x350/DCEDC8/4CAF50?text=Sustainability+Consulting"
-                isReversed={false}
-            />
-            <ServiceDetailCard
-                icon="dollar-sign"
-                title="Decarbonization Financing"
-                description={content.decarbonizationFinancingText}
-                image="https://placehold.co/600x350/FFCDD2/F44336?text=Green+Financing"
-                isReversed={true}
-            />
-
-            <div className="text-center mt-16">
-                <h4 className="text-3xl font-bold text-gray-900 mb-6">Ready to Transform Your Business?</h4>
-                <p className="text-lg text-gray-700 mb-8">
-                    Contact us today to discuss how our tailored solutions can benefit your organization.
-                </p>
-                <button
-                    onClick={() => setCurrentPage('contact')}
-                    className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 flex items-center justify-center mx-auto"
-                >
-                    <LucideIcon name="calendar-check" className="w-5 h-5 mr-2" /> Schedule a Consultation
-                </button>
-            </div>
-        </Section>
-    );
-
-    // Service Detail Card Component for Services Page
-    const ServiceDetailCard = ({ icon, title, description, image, isReversed }) => (
-        <div className={`flex flex-col ${isReversed ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center bg-gray-50 rounded-xl shadow-lg mb-12 p-8 border border-gray-100`}>
-            <div className="lg:w-1/2 p-4 flex justify-center items-center mb-8 lg:mb-0">
-                <img
-                    src={image}
-                    alt={title}
-                    className="rounded-lg shadow-md w-full max-w-md h-auto object-cover"
-                    onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/600x350/CCCCCC/333333?text=${title.replace(/\s/g, '+')}`; }}
-                />
-            </div>
-            <div className="lg:w-1/2 p-4 lg:pl-8">
-                <div className="flex items-center mb-4">
-                    <div className="text-green-600 bg-green-100 p-3 rounded-full mr-3">
-                        <LucideIcon name={icon} className="w-8 h-8" />
+                        <!-- Contact Form Placeholder -->
+                        <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                            <h4 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                                <span data-lucide="send" class="lucide-icon text-green-600 mr-3"></span> Send Us a Message
+                            </h4>
+                            <form class="space-y-6">
+                                <div>
+                                    <label for="name" class="block text-gray-700 text-sm font-medium mb-2">Your Name</label>
+                                    <input
+                                        type="text"
+                                        id="name"
+                                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 ease-in-out"
+                                        placeholder="John Doe"
+                                    />
+                                </div>
+                                <div>
+                                    <label for="email" class="block text-gray-700 text-sm font-medium mb-2">Your Email</label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 ease-in-out"
+                                        placeholder="john.doe@example.com"
+                                    />
+                                </div>
+                                <div>
+                                    <label for="message" class="block text-gray-700 text-sm font-medium mb-2">Your Message</label>
+                                    <textarea
+                                        id="message"
+                                        rows="5"
+                                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 ease-in-out"
+                                        placeholder="Tell us how we can help..."
+                                    ></textarea>
+                                </div>
+                                <button
+                                    type="submit"
+                                    class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 flex items-center justify-center"
+                                >
+                                    <span data-lucide="send" class="lucide-icon mr-2"></span> Submit Message
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                    <h4 className="text-3xl font-bold text-gray-900">{title}</h4>
-                </div>
-                <p className="text-lg text-gray-700 leading-relaxed">{description}</p>
-            </div>
-        </div>
-    );
-
-    // Contact Us Page Component
-    const ContactPage = () => (
-        <Section id="contact-us" className="bg-gray-50">
-            <h3 className="text-4xl md:text-5xl font-bold text-gray-900 text-center mb-12">Get in Touch</h3>
-            <p className="text-xl text-gray-700 text-center mb-16 max-w-2xl mx-auto">
-                We'd love to hear from you. Whether you have a question about our services, a partnership inquiry, or just want to discuss your climate strategy, our team is ready to assist.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                {/* Contact Information */}
-                <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
-                    <h4 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                        <LucideIcon name="info" className="w-6 h-6 mr-3 text-green-600" /> Our Details
-                    </h4>
-                    <p className="text-lg text-gray-700 mb-4 flex items-center">
-                        <LucideIcon name="map-pin" className="w-5 h-5 mr-3 text-green-600" />
-                        Ahmedabad & Pune, India
-                    </p>
-                    <p className="text-lg text-gray-700 mb-4 flex items-center">
-                        <LucideIcon name="mail" className="w-5 h-5 mr-3 text-green-600" />
-                        <a href="mailto:contact@offsetease.com" className="text-green-700 hover:underline">contact@offsetease.com</a>
-                    </p>
-                    <p className="text-lg text-gray-700 mb-4 flex items-center">
-                        <LucideIcon name="phone" className="w-5 h-5 mr-3 text-green-600" />
-                        +91 98765 43210 (Placeholder)
-                    </p>
-                    <p className="text-sm text-gray-600 mt-6">
-                        Offsetease – Strategic Climate Advisory for Business Impact
-                    </p>
-                </div>
-
-                {/* Contact Form Placeholder */}
-                <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
-                    <h4 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                        <LucideIcon name="send" className="w-6 h-6 mr-3 text-green-600" /> Send Us a Message
-                    </h4>
-                    <form className="space-y-6">
-                        <div>
-                            <label htmlFor="name" className="block text-gray-700 text-sm font-medium mb-2">Your Name</label>
-                            <input
-                                type="text"
-                                id="name"
-                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 ease-in-out"
-                                placeholder="John Doe"
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="email" className="block text-gray-700 text-sm font-medium mb-2">Your Email</label>
-                            <input
-                                type="email"
-                                id="email"
-                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 ease-in-out"
-                                placeholder="john.doe@example.com"
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="message" className="block text-gray-700 text-sm font-medium mb-2">Your Message</label>
-                            <textarea
-                                id="message"
-                                rows="5"
-                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200 ease-in-out"
-                                placeholder="Tell us how we can help..."
-                            ></textarea>
-                        </div>
-                        <button
-                            type="submit"
-                            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 flex items-center justify-center"
-                        >
-                            <LucideIcon name="send" className="w-5 h-5 mr-2" /> Submit Message
-                        </button>
-                    </form>
                 </div>
             </div>
-        </Section>
-    );
+        </section>
+    </main>
 
-    // Main App Render
-    return (
-        <div className="min-h-screen flex flex-col">
-            <Navbar />
-            <main className="flex-grow">
-                {/* Switch statement to render current page */}
-                {(() => {
-                    switch (currentPage) {
-                        case 'home':
-                            return <HomePage />;
-                        case 'about':
-                            return <AboutPage />;
-                        case 'services':
-                            return <ServicesPage />;
-                        case 'contact':
-                            return <ContactPage />;
-                        default:
-                            return <HomePage />; // Default to home
-                    }
-                })()}
-            </main>
-            <Footer />
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 text-center">
+        <div class="container mx-auto px-4">
+            <p>&copy; <span id="current-year"></span> Offsetease. All rights reserved.</p>
+            <p class="mt-2 text-sm text-gray-400">Strategic Climate Advisory for Business Impact</p>
         </div>
-    );
-};
+    </footer>
 
-export default App;
+    <script>
+        // Function to show/hide pages based on button clicks
+        function showPage(pageId) {
+            // Hide all page content sections
+            const pages = document.querySelectorAll('.page-content');
+            pages.forEach(page => page.classList.remove('active'));
+
+            // Show the requested page
+            const activePage = document.getElementById(pageId);
+            if (activePage) {
+                activePage.classList.add('active');
+            }
+
+            // Update active state in navigation
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            // Ensure the element exists before trying to add class
+            const targetNavItem = document.querySelector(`.nav-item[onclick="showPage('${pageId}')"]`);
+            if (targetNavItem) {
+                targetNavItem.classList.add('active');
+            }
+
+            // Scroll to top of the page for better UX on navigation
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize Lucide icons after the DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set current year in footer
+            const currentYearSpan = document.getElementById('current-year');
+            if (currentYearSpan) {
+                currentYearSpan.textContent = new Date().getFullYear();
+            }
+            
+            // Ensure Lucide icons are created
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                lucide.createIcons();
+            } else {
+                console.warn("Lucide library not loaded or createIcons method not found.");
+            }
+            
+            // Set initial page to 'home'
+            showPage('home');
+        });
+
+        // Initialize Lucide icons on window load as well, in case DOMContentLoaded fires too early for some CDN loads
+        window.onload = function() {
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                lucide.createIcons();
+            }
+        };
+
+    </script>
+</body>
+</html>
